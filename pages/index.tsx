@@ -1,12 +1,20 @@
 import Head from 'next/head'
+import { useState } from 'react';
 import clientPromise from '../lib/mongodb'
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
-import { TextInput, Checkbox, Button, Group, Box, Select } from '@mantine/core';
+import { TextInput, Checkbox, Button, Group, Box, Select, Paper } from '@mantine/core';
 import { useForm } from '@mantine/form';
 
 type ConnectionStatus = {
   isConnected: boolean
-}
+};
+
+interface FormValues {
+  includeOtherIngredients: boolean;
+  typeOfFood: string;
+  ingredients: string[];
+  // [key: string]: string;
+};
 
 export const getServerSideProps: GetServerSideProps<
   ConnectionStatus
@@ -31,38 +39,48 @@ export const getServerSideProps: GetServerSideProps<
       props: { isConnected: false },
     }
   }
-}
+};
 
 export default function Home({
   isConnected,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const form = useForm({
+  const form = useForm<FormValues>({
     initialValues: {
-      ingredient: '',
-      catsYesOrNo: false,
+      ingredients: [''],
+      includeOtherIngredients: true,
+      typeOfFood: 'Any'
     },
-
   });
+
+  const [ingredients, setIngredients] = useState<string[]>(['ingredients']);
+
+  const addIngredientField = () => {
+    setIngredients([...ingredients, `input${ingredients.length + 1}`]);
+  };
+
   return (
     <Box maw={340} mx="auto">
     
       <form onSubmit={form.onSubmit((values) => console.log(values))}>
-        <TextInput
-          // withAsterisk
-          label="Ingredient"
-          placeholder="red peppers"
-          {...form.getInputProps('ingredient')}
-        />
+        {ingredients.map((ingredient, i) => (
+          <Paper key={ingredient} style={{ marginBottom: '16px' }}>
+            <TextInput
+              name={ingredient}
+              label={`Ingredient ${i+1}`}
+              value={form.values.ingredients[i]}
+              onChange={(event) => form.setFieldValue(ingredient, event.currentTarget.value)}
+            />
+          </Paper>
+      ))}
 
         <Checkbox
           mt="md"
-          label="I like cats"
-          {...form.getInputProps('catsYesOrNo', { type: 'checkbox' })}
+          label="Include other ingredients that are not on my list"
         />
         <Select
           label="Type of cuisine"
           placeholder="Choose your favourite"
-          data={['Chinese', 'Greek', 'Indian', 'Italian']}
+          data={['Any', 'Chinese', 'Greek', 'Indian', 'Italian']}
         />
 
         <Group justify="flex-end" mt="md">
@@ -79,7 +97,7 @@ export default function Home({
           </h2>
       )}
     </Box>
-  )
+  );
   
   // return (
   //   <div className="container">
@@ -301,4 +319,4 @@ export default function Home({
   //     `}</style>
   //   </div>
   // )
-}
+};
