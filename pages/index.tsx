@@ -12,8 +12,7 @@ type ConnectionStatus = {
 interface FormValues {
   includeOtherIngredients: boolean;
   typeOfFood: string;
-  ingredients: string[];
-  // [key: string]: string;
+  ingredients: Record<string, string>;
 };
 
 export const getServerSideProps: GetServerSideProps<
@@ -46,7 +45,9 @@ export default function Home({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const form = useForm<FormValues>({
     initialValues: {
-      ingredients: [''],
+      ingredients: {
+        ingredient1: ''
+      },
       includeOtherIngredients: true,
       typeOfFood: 'Any'
     },
