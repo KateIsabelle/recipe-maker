@@ -2,7 +2,7 @@ import Head from 'next/head'
 import { useState } from 'react';
 import clientPromise from '../lib/mongodb'
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
-import { TextInput, Checkbox, Button, Group, Box, Select, Paper } from '@mantine/core';
+import { TextInput, Checkbox, Button, Group, Box, Select, Paper, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
 
 type ConnectionStatus = {
@@ -53,32 +53,44 @@ export default function Home({
     },
   });
 
-  const [ingredients, setIngredients] = useState<string[]>(['ingredients']);
+  const [ingredientFields, setIngredientFields] = useState(['ingredient1']);
 
   const addIngredientField = () => {
-    setIngredients([...ingredients, `input${ingredients.length + 1}`]);
+    setIngredientFields([...ingredientFields, `ingredient${ingredientFields.length + 1}`]);
   };
 
   return (
     <Box maw={340} mx="auto">
     
       <form onSubmit={form.onSubmit((values) => console.log(values))}>
-        {ingredients.map((ingredient, i) => (
-          <Paper key={ingredient} style={{ marginBottom: '16px' }}>
-            <TextInput
-              name={ingredient}
-              label={`Ingredient ${i+1}`}
-              value={form.values.ingredients[i]}
-              onChange={(event) => form.setFieldValue(ingredient, event.currentTarget.value)}
-            />
-          </Paper>
+        {ingredientFields.map((ingredientField, index) => (
+            <Paper key={ingredientField} style={{ marginBottom: '16px' }}>
+              <TextInput
+                name={ingredientField}
+                label={`Ingredient ${index+1}`}
+                onChange={(event) => form.setFieldValue(`ingredients.${ingredientField}`, event.currentTarget.value)}
+              />
+            {index === ingredientFields.length - 1 && ( // Show the plus button next to the last input
+            <Button
+              variant="light"
+              size="xs"
+              onClick={addIngredientField}
+              style={{ marginLeft: '8px' }}
+            >
+              <Text size="xs">+</Text>
+            </Button>
+          )}
+            </Paper>
       ))}
 
         <Checkbox
+          defaultChecked
+          name="includeOtherIngredients"
           mt="md"
           label="Include other ingredients that are not on my list"
         />
         <Select
+          name="typeOfFood"
           label="Type of cuisine"
           placeholder="Choose your favourite"
           data={['Any', 'Chinese', 'Greek', 'Indian', 'Italian']}
